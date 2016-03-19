@@ -4,6 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <math.h>
+#include <exception>
 
 class CStampRecognition {
 public:
@@ -16,6 +17,8 @@ public:
         int GetCenterY() { return centerY; }
         int GetRadius() { return radius; }
 
+        float Square() { return CV_PI * radius * radius; }
+        float IntersectionSquare( const CCircle& oth );
     private:
         int centerX;
         int centerY;
@@ -31,7 +34,10 @@ private:
     IplImage* image;
     IplImage* grayImage;
     std::vector< CCircle > answers;
-    
+
     void drawResult( CvSeq* results );
+    float scoreResult( CvSeq* results );
+    // TODO: подобрать константу
+    const float EXTRA_CIRCLES_PENALTY = 0.0f;
 };
 
