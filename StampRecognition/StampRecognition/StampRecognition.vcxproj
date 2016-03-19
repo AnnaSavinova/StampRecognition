@@ -113,6 +113,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StampRecognition.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StampRecognition.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

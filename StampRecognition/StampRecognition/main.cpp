@@ -1,51 +1,13 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-#include <math.h>
+#include "StampRecognition.h"
 
 int main( int argc, char* argv[] )
 {
-    IplImage* image = 0;
     // имя картинки задаётся первым параметром
     char* filename = argc >= 2 ? argv[1] : "Image0.jpg";
-    // получаем картинку (в градациях серого)
-    image = cvLoadImage( filename, CV_LOAD_IMAGE_GRAYSCALE );
 
-    printf( "[i] image: %s\n", filename );
-    assert( image != 0 );
+    CStampRecognition sr( filename );
+    sr.DoHough();
 
-    // загрузим оригинальное изображении
-    IplImage* src = cvLoadImage( filename );
-
-    // хранилище памяти для кругов
-    CvMemStorage* storage = cvCreateMemStorage( 0 );
-    // сглаживаем изображение
-    cvSmooth( image, image, CV_GAUSSIAN, 5, 5 );
-    // поиск кругов
-    CvSeq* results = cvHoughCircles(
-        image,
-        storage,
-        CV_HOUGH_GRADIENT,
-        10,
-        image->width/5
-        );
-    // пробегаемся по кругам и рисуем их на оригинальном изображении
-    for( int i = 0; i < results->total; i++ ) {
-        float* p = ( float* ) cvGetSeqElem( results, i );
-        CvPoint pt = cvPoint( cvRound( p[0] ), cvRound( p[1] ) );
-        cvCircle( src, pt, cvRound( p[2] ), CV_RGB( 0xff, 0, 0 ) );
-    }
-    // показываем
-    cvNamedWindow( "cvHoughCircles", 1 );
-    cvShowImage( "cvHoughCircles", src );
-
-    // ждём нажатия клавиши
-    cvWaitKey( 0 );
-
-    // освобождаем ресурсы
-    cvReleaseMemStorage( &storage );
-    cvReleaseImage( &image );
-    cvReleaseImage( &src );
-    cvDestroyAllWindows();
+    system( "pause" );
     return 0;
 }
