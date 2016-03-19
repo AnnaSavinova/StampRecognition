@@ -1,6 +1,7 @@
 #include "StampRecognition.h"
 
-CStampRecognition::CStampRecognition( const char* imagePath )
+CStampRecognition::CStampRecognition( const char* imagePath, std::vector< CCircle > _answers ) :
+    answers( _answers )
 {
     image = cvLoadImage( imagePath );
     grayImage = cvLoadImage( imagePath, CV_LOAD_IMAGE_GRAYSCALE );
@@ -25,7 +26,7 @@ void CStampRecognition::DoHough()
         grayImage,
         storage,
         CV_HOUGH_GRADIENT,
-        2,
+        10,
         grayImage->width/5
         );
 
@@ -39,10 +40,15 @@ void CStampRecognition::drawResult( CvSeq * results )
     IplImage* base = cvCloneImage( image );
 
     // пробегаемся по кругам и рисуем их на оригинальном изображении
+    for( size_t i = 0; i < answers.size(); ++i ) {
+        CvPoint center = cvPoint( answers[i].GetCenterX(), answers[i].GetCenterY() );
+        cvCircle( base, center, answers[i].GetRadius(), CV_RGB( 0, 0xff, 0 ), 3 );
+    }
+
     for( int i = 0; i < results->total; i++ ) {
         float* circle = ( float* ) cvGetSeqElem( results, i );
         CvPoint center = cvPoint( cvRound( circle[0] ), cvRound( circle[1] ) );
-        cvCircle( base, center, cvRound( circle[2] ), CV_RGB( 0xff, 0xff, 0xff ) );
+        cvCircle( base, center, cvRound( circle[2] ), CV_RGB( 0xff, 0, 0 ) );
     }
 
     cvNamedWindow( "ResultCirclesOnImage", 0 );
@@ -52,3 +58,9 @@ void CStampRecognition::drawResult( CvSeq * results )
     cvWaitKey( 0 );
     cvReleaseImage( &base );
 }
+
+CStampRecognition::CCircle::CCircle( int _centerX, int _centerY, int _radius ) : centerX( _centerX ), centerY( _centerY ), radius( _radius )
+{}
+
+CStampRecognition::CCircle::~CCircle()
+{}

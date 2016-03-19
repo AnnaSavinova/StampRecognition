@@ -1,0 +1,2 @@
+prognoz.jpg 1 1611 3360 287 
+example.png 1 580 844 62
