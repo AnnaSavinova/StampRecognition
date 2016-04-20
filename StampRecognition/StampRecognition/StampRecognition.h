@@ -5,6 +5,8 @@
 #include <iostream>
 #include <math.h>
 #include <exception>
+#include <fstream>
+
 
 class CStampRecognition {
 public:
@@ -25,12 +27,15 @@ public:
         int radius;
     };
 
-    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers );
+    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath, std::string _scoresPath );
     ~CStampRecognition();
 
     void DoHough();
 
 private:
+    std::ofstream scoresOut;
+
+    std::string imageSavePath;
     IplImage* image;
     IplImage* grayImage;
     std::vector< CCircle > answers;

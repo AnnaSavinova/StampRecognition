@@ -1,17 +1,19 @@
 #include "StampRecognition.h"
 
-CStampRecognition::CStampRecognition( const char* imagePath, std::vector< CCircle > _answers ) :
-    answers( _answers )
+CStampRecognition::CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath, std::string scoresPath ) :
+    answers( _answers ), imageSavePath ( _imageSavePath )
 {
-    image = cvLoadImage( imagePath );
-    grayImage = cvLoadImage( imagePath, CV_LOAD_IMAGE_GRAYSCALE );
+    image = cvLoadImage( _imagePath );
+    grayImage = cvLoadImage( _imagePath, CV_LOAD_IMAGE_GRAYSCALE );
 
-    std::cout << "image: " << imagePath << std::endl;
+    std::cout << "image: " << _imagePath << std::endl;
     if( image == 0 || grayImage == 0 ) {
         std::string errorMsg = "Ќевозможно открыть изображение ";
-        errorMsg += imagePath;
+        errorMsg += _imagePath;
         throw std::invalid_argument( errorMsg );
     }
+
+    scoresOut.open( scoresPath, std::ofstream::out );
 }
 
 CStampRecognition::~CStampRecognition()
@@ -19,28 +21,37 @@ CStampRecognition::~CStampRecognition()
     cvDestroyAllWindows();
     cvReleaseImage( &image );
     cvReleaseImage( &grayImage );
+
+    scoresOut.close();
 }
 
 void CStampRecognition::DoHough()
 {
+    //std::cout << "DoHough!" << std::endl;
     CvMemStorage* storage = cvCreateMemStorage( 0 );
     cvSmooth( grayImage, grayImage, CV_GAUSSIAN, 5, 5 );
     CvSeq* results = cvHoughCircles(
         grayImage,
         storage,
         CV_HOUGH_GRADIENT,
-        10,
-        grayImage->width/5
+        1,
+        grayImage->width/8,
+        200,
+        100,
+        0,
+        0
         );
 
     drawResult( results );
     std::cout << "score: " << scoreResult( results ) << std::endl;
+    scoresOut << imageSavePath << "," << scoreResult( results ) << std::endl;
 
     cvReleaseMemStorage( &storage );
 }
 
 void CStampRecognition::drawResult( CvSeq * results )
 {
+    //std::cout << "Draw!" << std::endl;
     IplImage* base = cvCloneImage( image );
 
     // рисуем правильные ответы зелЄным
@@ -53,30 +64,38 @@ void CStampRecognition::drawResult( CvSeq * results )
     for( int i = 0; i < results->total; ++i ) {
         float* circle = ( float* ) cvGetSeqElem( results, i );
         CvPoint center = cvPoint( cvRound( circle[0] ), cvRound( circle[1] ) );
-        cvCircle( base, center, cvRound( circle[2] ), CV_RGB( 0xff, 0, 0 ) );
+        cvCircle( base, center, cvRound( circle[2] ), CV_RGB( 0xff, 0, 0 ), 3 );
     }
 
-    cvNamedWindow( "ResultCirclesOnImage", 0 );
-    cvShowImage( "ResultCirclesOnImage", base );
+    /*cvNamedWindow( "ResultCirclesOnImage", 0 );
+    cvShowImage( "ResultCirclesOnImage", base );*/
+    cvSaveImage( imageSavePath.c_str(), base );
 
     // ждЄм нажати€ клавиши
-    cvWaitKey( 0 );
+    //cvWaitKey( 0 );
     cvReleaseImage( &base );
 }
 
 float CStampRecognition::scoreResult( CvSeq * results )
 {
+    //std::cout << "Score!" << std::endl;
     float scoresSum = 0.0f;
     for( size_t i = 0; i < answers.size(); ++i ) {
         float maxScore = 0.0f;
         for( size_t j = 0; j < results->total; ++j ) {
             float* circle = ( float* ) cvGetSeqElem( results, j );
-            float score = answers[i].IntersectionSquare( CCircle( circle[0], circle[1], circle[2] ) ) / answers[i].Square();
+            CCircle result( circle[0], circle[1], circle[2] );
+            float score = answers[i].IntersectionSquare( result ) * 2.;
+            score = score / ( answers[i].Square() + result.Square() );
             if( score > maxScore ) {
                 maxScore = score;
             }
         }
         scoresSum += maxScore;
+    }
+    //нормируем дл€ случа€ нескольких печатей
+    if( answers.size() > 1 ) {
+        scoresSum /= answers.size();
     }
 
     // штрафуем за лишние найденные круги
@@ -101,9 +120,17 @@ float CStampRecognition::CCircle::IntersectionSquare( const CCircle& oth )
         return 0.0f;
     }
 
-    //если центры окружностей совпадают, пересечение - окружность с меньшим радиусом
-    if( !( d > 0 ) ) {
-        int minRadius = MIN( radius, oth.radius );
+    //если окружность вложена во вторую, то пересечение - площадь меньшей
+    if( ( ( centerX + radius ) <= ( oth.centerX + oth.radius ) ) &&
+        ( ( centerX - radius ) >= ( oth.centerX - oth.radius ) ) &&
+        ( ( centerY + radius ) <= ( oth.centerY + oth.radius ) ) &&
+        ( ( centerY - radius ) >= ( oth.centerY - oth.radius ) ) ||
+        ( ( centerX + radius ) >= ( oth.centerX + oth.radius ) ) &&
+        ( ( centerX - radius ) <= ( oth.centerX - oth.radius ) ) &&
+        ( ( centerY + radius ) >= ( oth.centerY + oth.radius ) ) &&
+        ( ( centerY - radius ) <= ( oth.centerY - oth.radius ) )
+        ) {
+        float minRadius = MIN( radius, oth.radius );
         return CV_PI * minRadius * minRadius;
     }
     float f1 = 2 * acos( ( radius * radius - oth.radius * oth.radius + d * d ) / ( 2 * radius * d ) );
