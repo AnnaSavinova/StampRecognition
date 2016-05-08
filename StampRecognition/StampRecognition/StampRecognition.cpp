@@ -28,7 +28,6 @@ CStampRecognition::~CStampRecognition()
 void CStampRecognition::runHoughWithParams( double dp, double minDist, double param1, double param2, double minSize, double maxSize )
 {
     CvMemStorage* storage = cvCreateMemStorage( 0 );
-    //cvSmooth( grayImage, grayImage, CV_GAUSSIAN, 5, 5 );
     CvSeq* results = cvHoughCircles(
         grayImage,
         storage,
@@ -43,13 +42,16 @@ void CStampRecognition::runHoughWithParams( double dp, double minDist, double pa
 
     drawResult( results );
     std::cout << "score: " << scoreResult( results ) << std::endl;
+    scoresOut << imageSavePath << "," << scoreResult( results ) << "," <<
+        dp << "," << minDist << "," << param1 << "," << param2 << "," <<
+        minSize << "," << maxSize << "," << results->total << "," << answers.size() << std::endl;
 
     cvReleaseMemStorage( &storage );
 }
 
 void CStampRecognition::DoHough()
 {
-    runHoughWithParams( 2, 5, 170, 170, 5, 120 );    
+    runHoughWithParams( 2, 5, 100, 170, 5, 120 );    
 }
 
 void CStampRecognition::drawResult( CvSeq * results )

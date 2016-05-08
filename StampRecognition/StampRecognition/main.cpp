@@ -16,8 +16,7 @@ int main( int argc, char* argv[] )
 
     std::string scoresPathPrefix( imageSavePathPrefix );
 
-    int counter = 0;
-    while( !in.eof() && counter < 20 ) {
+    while( !in.eof() ) {
         std::string imageName;
         in >> imageName;
         std::string imagePath = imagesPathPrefix + imageName;
@@ -44,7 +43,6 @@ int main( int argc, char* argv[] )
 
         CStampRecognition sr( imagePath.c_str(), answers, imageSavePath, scoresPath );
         sr.DoHough();
-        ++counter;
     }
     in.close();
 
