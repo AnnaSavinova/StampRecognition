@@ -25,33 +25,35 @@ CStampRecognition::~CStampRecognition()
     scoresOut.close();
 }
 
-void CStampRecognition::DoHough()
+void CStampRecognition::runHoughWithParams( double dp, double minDist, double param1, double param2, double minSize, double maxSize )
 {
-    //std::cout << "DoHough!" << std::endl;
     CvMemStorage* storage = cvCreateMemStorage( 0 );
-    cvSmooth( grayImage, grayImage, CV_GAUSSIAN, 5, 5 );
+    //cvSmooth( grayImage, grayImage, CV_GAUSSIAN, 5, 5 );
     CvSeq* results = cvHoughCircles(
         grayImage,
         storage,
         CV_HOUGH_GRADIENT,
-        1,
-        grayImage->width/8,
-        200,
-        100,
-        0,
-        0
-        );
+        dp,
+        minDist,
+        param1,
+        param2,
+        minSize,
+        maxSize
+    );
 
     drawResult( results );
     std::cout << "score: " << scoreResult( results ) << std::endl;
-    scoresOut << imageSavePath << "," << scoreResult( results ) << std::endl;
 
     cvReleaseMemStorage( &storage );
 }
 
+void CStampRecognition::DoHough()
+{
+    runHoughWithParams( 2, 5, 170, 170, 5, 120 );    
+}
+
 void CStampRecognition::drawResult( CvSeq * results )
 {
-    //std::cout << "Draw!" << std::endl;
     IplImage* base = cvCloneImage( image );
 
     // рисуем правильные ответы зелёным
@@ -67,12 +69,8 @@ void CStampRecognition::drawResult( CvSeq * results )
         cvCircle( base, center, cvRound( circle[2] ), CV_RGB( 0xff, 0, 0 ), 3 );
     }
 
-    /*cvNamedWindow( "ResultCirclesOnImage", 0 );
-    cvShowImage( "ResultCirclesOnImage", base );*/
     cvSaveImage( imageSavePath.c_str(), base );
 
-    // ждём нажатия клавиши
-    //cvWaitKey( 0 );
     cvReleaseImage( &base );
 }
 

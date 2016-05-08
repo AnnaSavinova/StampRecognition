@@ -14,11 +14,10 @@ int main( int argc, char* argv[] )
         throw std::invalid_argument( "Невозможно открыть файл с информацией о изображениях" );
     }
 
-    std::ofstream scoresOut;
-    std::string scoresPath( imageSavePathPrefix );
-    scoresPath += "scores.csv";
+    std::string scoresPathPrefix( imageSavePathPrefix );
 
-    while( !in.eof() ) {
+    int counter = 0;
+    while( !in.eof() && counter < 20 ) {
         std::string imageName;
         in >> imageName;
         std::string imagePath = imagesPathPrefix + imageName;
@@ -35,8 +34,17 @@ int main( int argc, char* argv[] )
             std::cout << imagePath << " " << centerX << " " << centerY << " " << radius << std::endl;
             answers.push_back( CStampRecognition::CCircle( centerX, centerY, radius ) );
         }
+        std::string scoresPath = scoresPathPrefix + imageName;
+        scoresPath += "_scores.csv";
+
+        std::ofstream scoresOut;
+        scoresOut.open( scoresPath, std::ofstream::out );
+        scoresOut << "path,dp,minDist,param1,param2,minSize,maxSize" <<std::endl;
+        scoresOut.close();
+
         CStampRecognition sr( imagePath.c_str(), answers, imageSavePath, scoresPath );
         sr.DoHough();
+        ++counter;
     }
     in.close();
 

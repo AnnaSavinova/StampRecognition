@@ -44,5 +44,7 @@ private:
     float scoreResult( CvSeq* results );
     // TODO: подобрать константу
     const float EXTRA_CIRCLES_PENALTY = 0.0f;
+
+    void runHoughWithParams( double dp, double minDist, double param1, double param2, double minSize, double maxSize );
 };
 
