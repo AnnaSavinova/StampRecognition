@@ -70,7 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(IncludePath);;C:\Users\Anna\YandexDisk\MyDocuments\Физтех\Diplom\eigen-eigen-07105f7124f9</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(IncludePath);;C:\Users\Anna\YandexDisk\MyDocuments\Физтех\Diplom\eigen-eigen-07105f7124f9</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -115,10 +120,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="HoughRecognition.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MinSquareRecognizing.cpp" />
     <ClCompile Include="StampRecognition.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Circle.h" />
+    <ClInclude Include="HoughRecognition.h" />
+    <ClInclude Include="MinSquareRecognizing.h" />
     <ClInclude Include="StampRecognition.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

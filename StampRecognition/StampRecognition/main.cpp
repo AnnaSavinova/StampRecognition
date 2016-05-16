@@ -24,14 +24,14 @@ int main( int argc, char* argv[] )
 
         int count, centerX, centerY, radius;
         in >> count;
-        std::vector< CStampRecognition::CCircle > answers;
+        std::vector< CCircle > answers;
 
         for( int i = 0; i < count; ++i ) {
             in >> centerX;
             in >> centerY;
             in >> radius;
             std::cout << imagePath << " " << centerX << " " << centerY << " " << radius << std::endl;
-            answers.push_back( CStampRecognition::CCircle( centerX, centerY, radius ) );
+            answers.push_back( CCircle( centerX, centerY, radius ) );
         }
         std::string scoresPath = scoresPathPrefix + imageName;
         scoresPath += "_scores.csv";
@@ -41,8 +41,9 @@ int main( int argc, char* argv[] )
         scoresOut << "path,dp,minDist,param1,param2,minSize,maxSize" <<std::endl;
         scoresOut.close();
 
-        CStampRecognition sr( imagePath.c_str(), answers, imageSavePath, scoresPath );
-        sr.DoHough();
+        CStampRecognition sr( imagePath.c_str(), answers, imageSavePath );
+        //sr.DoHough();
+        sr.DoMinSquare();
     }
     in.close();
 

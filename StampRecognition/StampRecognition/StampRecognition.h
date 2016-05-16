@@ -1,50 +1,31 @@
 #pragma once
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <math.h>
 #include <exception>
 #include <fstream>
 
+#include "HoughRecognition.h"
+#include "MinSquareRecognizing.h"
 
 class CStampRecognition {
 public:
-    struct CCircle {
-    public:
-        CCircle( int _centerX, int _centerY, int _radius );
-        ~CCircle();
-
-        int GetCenterX() { return centerX; }
-        int GetCenterY() { return centerY; }
-        int GetRadius() { return radius; }
-
-        float Square() { return CV_PI * radius * radius; }
-        float IntersectionSquare( const CCircle& oth );
-    private:
-        int centerX;
-        int centerY;
-        int radius;
-    };
-
-    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath, std::string _scoresPath );
+    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath );
     ~CStampRecognition();
 
     void DoHough();
+    void DoMinSquare();
 
 private:
-    std::ofstream scoresOut;
+    // TODO: подобрать константу
+    const float EXTRA_CIRCLES_PENALTY = 0.0f;
 
     std::string imageSavePath;
     IplImage* image;
     IplImage* grayImage;
     std::vector< CCircle > answers;
 
-    void drawResult( CvSeq* results );
-    float scoreResult( CvSeq* results );
-    // TODO: подобрать константу
-    const float EXTRA_CIRCLES_PENALTY = 0.0f;
-
-    void runHoughWithParams( double dp, double minDist, double param1, double param2, double minSize, double maxSize );
+    void drawResult( std::vector<CCircle> results );
+    double scoreResult( std::vector<CCircle> results );
 };
 
