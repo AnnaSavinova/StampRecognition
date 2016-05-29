@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <math.h>
 #include <exception>
 #include <fstream>
@@ -10,7 +9,7 @@
 
 class CStampRecognition {
 public:
-    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath );
+    CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath, std::string _scoresPath );
     ~CStampRecognition();
 
     void DoHough();
@@ -21,7 +20,10 @@ private:
     const float EXTRA_CIRCLES_PENALTY = 0.0f;
 
     std::string imageSavePath;
+    std::string scoresPath;
     IplImage* image;
+    cv::Mat matImage;
+    cv::Mat matGrayImage;
     IplImage* grayImage;
     std::vector< CCircle > answers;
 

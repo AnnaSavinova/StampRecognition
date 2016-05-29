@@ -1,13 +1,9 @@
 #include "MinSquareRecognizing.h"
 
 #include <Eigen\Eigenvalues>
-#include <opencv2\core\core.hpp>
-#include <opencv2\core\eigen.hpp>
-#include <opencv2\highgui\highgui.hpp>
+#include "Common.h"
 
-#include <iostream>
-
-CMinSquareRecognizing::CMinSquareRecognizing()
+CMinSquareRecognizing::CMinSquareRecognizing( cv::Mat _image, std::string _imageSavePath ) : image( _image ), imageSavePath( _imageSavePath )
 {}
 
 CMinSquareRecognizing::~CMinSquareRecognizing()
@@ -15,6 +11,8 @@ CMinSquareRecognizing::~CMinSquareRecognizing()
 
 std::vector<CCircle> CMinSquareRecognizing::FindCircles()
 {
+    getContours();
+
     std::vector<CvPoint> points;
     points.push_back( CvPoint( 15, 7 ) );
     points.push_back( CvPoint( 10, 12 ) );
@@ -79,9 +77,41 @@ CCircle CMinSquareRecognizing::getCircleByPoints( std::vector<CvPoint> points )
             double x = -b / 2.;
             double y = -c / 2.;
             double r = sqrt( b * b + c * c - 4 * d ) / 2.;
-            return CCircle( x, y, r );
+            return CCircle( cvRound( x ), cvRound( y ), cvRound( r ) );
         }
     }
 
     return CCircle( 0, 0, 0 );
+}
+
+std::vector<CvPoint> CMinSquareRecognizing::getContours()
+{
+    try {
+        cv::Mat gray;
+
+        cv::cvtColor( image, gray, CV_RGB2GRAY );
+        cv::threshold( gray, gray, 128, 255, CV_THRESH_BINARY );
+
+        std::vector< std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+
+        cv::Mat contourOutput = gray.clone();
+        cv::findContours( contourOutput, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
+
+        std::cout << contours.size() << std::endl;
+
+        cv::Mat imageWithContours = cv::Mat::zeros( gray.size(), CV_8UC3 );
+        for( int i = 0; i < contours.size(); ++i ) {
+            cv::drawContours( imageWithContours, contours, i, cv::Scalar( 255, 255, 255 ), 1, 8, hierarchy );
+        }
+
+        cv::bitwise_not( imageWithContours, imageWithContours );
+
+        cv::imwrite( imageSavePath, imageWithContours );
+
+    } catch( cv::Exception e ) {
+        std::cout << e.msg;
+    }
+
+    return std::vector<CvPoint>();
 }

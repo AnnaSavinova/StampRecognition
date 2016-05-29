@@ -1,9 +1,11 @@
 #include "StampRecognition.h"
 
-
-CStampRecognition::CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath ) :
-    answers( _answers ), imageSavePath( _imageSavePath )
+CStampRecognition::CStampRecognition( const char* _imagePath, std::vector< CCircle > _answers, std::string _imageSavePath, std::string _scoresPath ) :
+    answers( _answers ), imageSavePath( _imageSavePath ), scoresPath( _scoresPath )
 {
+    matImage = cv::imread( _imagePath );
+    matGrayImage = cv::imread( _imagePath, CV_LOAD_IMAGE_GRAYSCALE );
+
     image = cvLoadImage( _imagePath );
     grayImage = cvLoadImage( _imagePath, CV_LOAD_IMAGE_GRAYSCALE );
 
@@ -17,23 +19,28 @@ CStampRecognition::CStampRecognition( const char* _imagePath, std::vector< CCirc
 
 CStampRecognition::~CStampRecognition()
 {
-    cvDestroyAllWindows();
     cvReleaseImage( &image );
     cvReleaseImage( &grayImage );
 }
 
 void CStampRecognition::DoHough()
 {
-    CHoughRecognition hr( grayImage );
+    CHoughRecognition hr( matGrayImage );
 
     std::vector<CCircle> results = hr.FindCircles();
     drawResult( results );
-    std::cout << "score: " << scoreResult( results ) << std::endl;
+    double score = scoreResult( results );
+    std::cout << "score: " << score << std::endl;
+
+    std::fstream out;
+    out.open( scoresPath, std::fstream::out );
+    out << score << "," << results.size() << "," << answers.size() << std::endl;
+    out.close();
 }
 
 void CStampRecognition::DoMinSquare()
 {
-    CMinSquareRecognizing mr;
+    CMinSquareRecognizing mr( matImage, imageSavePath );
     mr.FindCircles();
 }
 

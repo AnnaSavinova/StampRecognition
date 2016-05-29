@@ -35,13 +35,8 @@ int main( int argc, char* argv[] )
         }
         std::string scoresPath = scoresPathPrefix + imageName;
         scoresPath += "_scores.csv";
-
-        std::ofstream scoresOut;
-        scoresOut.open( scoresPath, std::ofstream::out );
-        scoresOut << "path,dp,minDist,param1,param2,minSize,maxSize" <<std::endl;
-        scoresOut.close();
-
-        CStampRecognition sr( imagePath.c_str(), answers, imageSavePath );
+        
+        CStampRecognition sr( imagePath.c_str(), answers, imageSavePath, scoresPath );
         //sr.DoHough();
         sr.DoMinSquare();
     }
