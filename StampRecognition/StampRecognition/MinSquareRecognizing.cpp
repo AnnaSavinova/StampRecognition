@@ -84,7 +84,7 @@ CCircle CMinSquareRecognizing::getCircleByPoints( std::vector<CvPoint> points )
     return CCircle( 0, 0, 0 );
 }
 
-std::vector<CvPoint> CMinSquareRecognizing::getContours()
+std::vector<cv::Point> CMinSquareRecognizing::getContours()
 {
     try {
         cv::Mat gray;
@@ -96,13 +96,16 @@ std::vector<CvPoint> CMinSquareRecognizing::getContours()
         std::vector<cv::Vec4i> hierarchy;
 
         cv::Mat contourOutput = gray.clone();
-        cv::findContours( contourOutput, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
+        cv::findContours( contourOutput, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE );
 
         std::cout << contours.size() << std::endl;
 
+        std::vector< std::vector<cv::Point> > filteredContours = filterContours( contours );
+        std::cout << filteredContours.size() << std::endl;
+
         cv::Mat imageWithContours = cv::Mat::zeros( gray.size(), CV_8UC3 );
-        for( int i = 0; i < contours.size(); ++i ) {
-            cv::drawContours( imageWithContours, contours, i, cv::Scalar( 255, 255, 255 ), 1, 8, hierarchy );
+        for( int i = 0; i < filteredContours.size(); ++i ) {
+            cv::drawContours( imageWithContours, filteredContours, i, cv::Scalar( 255, 255, 255 ), 1, 8 );
         }
 
         cv::bitwise_not( imageWithContours, imageWithContours );
@@ -113,5 +116,18 @@ std::vector<CvPoint> CMinSquareRecognizing::getContours()
         std::cout << e.msg;
     }
 
-    return std::vector<CvPoint>();
+    return std::vector<cv::Point>();
+}
+
+std::vector< std::vector<cv::Point> > CMinSquareRecognizing::filterContours( std::vector< std::vector<cv::Point> >& contours )
+{
+    std::vector< std::vector<cv::Point> > result;
+    
+    for( size_t i = 0; i < contours.size(); ++i ) {
+        if( contours[i].size() > filterThreshold ) {
+            result.push_back( contours[i] );
+        }
+    }
+
+    return result;
 }

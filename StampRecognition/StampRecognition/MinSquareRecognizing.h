@@ -14,7 +14,11 @@ private:
     Eigen::MatrixXd generateScatterMatrix( std::vector<CvPoint> points );
 
     CCircle getCircleByPoints( std::vector<CvPoint> points );
-    std::vector<CvPoint> getContours();
+    std::vector<cv::Point> getContours();
+
+    //TODO подобрать параметр
+    const size_t filterThreshold = 70;
+    std::vector< std::vector<cv::Point> > filterContours( std::vector< std::vector<cv::Point> >& contours );
 
     //TODO подобрать параметр
     const double spectralTolerance = 0.0000000000001;
