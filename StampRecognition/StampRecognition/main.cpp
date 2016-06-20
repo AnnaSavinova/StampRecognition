@@ -7,7 +7,7 @@ int main( int argc, char* argv[] )
     // вторым аргументом передаем путь до папки с изображениями
     char* imagesPathPrefix = argc >= 3 ? argv[2] : "";
     std::string imageSavePathPrefix( imagesPathPrefix );
-    imageSavePathPrefix += "result\\";
+    imageSavePathPrefix += "result_minsquare\\";
     std::ifstream in;
     in.open( imagesInfo, std::ifstream::in );
     if( !in.is_open() ) {
@@ -37,8 +37,8 @@ int main( int argc, char* argv[] )
         scoresPath += "_scores.csv";
         
         CStampRecognition sr( imagePath.c_str(), answers, imageSavePath, scoresPath );
-        sr.DoHough();
-        //sr.DoMinSquare();
+        //sr.DoHough();
+        sr.DoMinSquare();
     }
     in.close();
 

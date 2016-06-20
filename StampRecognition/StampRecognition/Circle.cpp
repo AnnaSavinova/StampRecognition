@@ -4,6 +4,9 @@
 CCircle::CCircle( int _centerX, int _centerY, int _radius ) : centerX( _centerX ), centerY( _centerY ), radius( _radius )
 {}
 
+CCircle::CCircle( int _centerX, int _centerY, int _radius, double _accuracy ) : centerX( _centerX ), centerY( _centerY ), radius( _radius ), accuracy( _accuracy )
+{}
+
 CCircle::~CCircle()
 {}
 

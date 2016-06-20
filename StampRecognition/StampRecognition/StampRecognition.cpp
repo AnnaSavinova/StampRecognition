@@ -41,7 +41,16 @@ void CStampRecognition::DoHough()
 void CStampRecognition::DoMinSquare()
 {
     CMinSquareRecognizing mr( matImage, imageSavePath );
-    mr.FindCircles();
+    std::vector<CCircle> results = mr.FindCircles();
+
+    drawResult( results );
+    double score = scoreResult( results );
+    std::cout << "score: " << score << std::endl;
+
+    std::fstream out;
+    out.open( scoresPath, std::fstream::out );
+    out << score << "," << results.size() << "," << answers.size() << std::endl;
+    out.close();
 }
 
 void CStampRecognition::drawResult( std::vector<CCircle> results )
